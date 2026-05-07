@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis Tareas{% endblock %}
+
+{% block contenido %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Nueva Tarea</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/agregar_tarea">
+                    <div class="mb-3">
+                        <label>Título</label>
+                        <input type="text" class="form-control" name="titulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Descripción</label>
+                        <textarea class="form-control" name="descripcion" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Listado</h4>
+            </div>
+            <div class="card-body">
+                {% if tareas %}
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarea in tareas %}
+                        <tr class="{% if tarea.completada %}table-success{% endif %}">
+                            <td>{{ tarea.titulo }}</td>
+                            <td>{{ tarea.descripcion[:40] }}{% if tarea.descripcion|length > 40 %}...{% endif %}</td>
+                            <td>
+                                {% if tarea.completada %}
+                                    <span class="badge bg-success">Completada</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not tarea.completada %}
+                                <a href="/completar_tarea/{{ tarea._id }}" class="btn btn-success btn-sm">✔</a>
+                                {% endif %}
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar{{ tarea._id }}">✏</button>
+                                <a href="/eliminar_tarea/{{ tarea._id }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar?')">🗑</a>
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="modalEditar{{ tarea._id }}">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-warning">
+                                        <h5 class="modal-title">Editar Tarea</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="/editar_tarea/{{ tarea._id }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label>Título</label>
+                                                <input type="text" name="titulo" class="form-control" value="{{ tarea.titulo }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label>Descripción</label>
+                                                <textarea name="descripcion" class="form-control" rows="3">{{ tarea.descripcion }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-warning">Guardar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    No hay tareas. ¡Crea una!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
